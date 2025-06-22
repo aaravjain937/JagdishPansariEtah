@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jagdish Pansari Etah - General Store</title>
+  <style>
+    /* Reset & base */
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f0f4f8;
+      padding-top: 90px; /* for top cart bar + contact info */
+    }
+    header.cart-bar {
+      position: fixed;
+      top: 0;
+      left: 0; right: 0;
+      height: 50px;
+      background: #00796b;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 15px;
+      z-index: 1000;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+    }
+    header.cart-bar .cart-info {
+      font-size: 14px;
+    }
+    header.cart-bar button {
+      background: #004d40;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      font-size: 14px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    header.cart-bar button:hover {
+      background: #00332f;
+    }
+    #contact-info {
+      position: fixed;
+      top: 50px;
+      left: 0;
+      right: 0;
+      background: #004d40;
+      color: #fff;
+      padding: 10px 15px;
+      font-size: 14px;
+      text-align: center;
+      z-index: 999;
+      font-weight: 600;
+    }
+    #contact-info a {
+      color: #80cbc4;
+      text-decoration: underline;
+    }
+    main {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 10px 20px;
+      gap: 15px;
+    }
+    section.products-column {
+      flex: 1 1 300px;
+      max-height: calc(100vh - 130px);
+      overflow-y: auto;
+      background: white;
+      border-radius: 8px;
+      padding: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      min-width: 280px;
+    }
+    section.products-column h2 {
+      position: sticky;
+      top: 0;
+      background: #00796b;
+      color: white;
+      padding: 8px 10px;
+      margin: 0 0 10px 0;
+      border-radius: 6px 6px 0 0;
+      font-weight: 600;
+      font-size: 18px;
+      z-index: 5;
+    }
+    .product {
+      background: #e0f2f1;
+      margin-bottom: 12px;
+      padding: 10px;
+      border-radius: 6px;
+      box-shadow: 0 2px 5px rgb(0 0 0 / 0.1);
+      font-size: 14px;
+    }
+    .product h3 {
+      margin: 0 0 5px 0;
+      font-size: 16px;
+    }
+    .product p {
+      margin: 3px 0 8px 0;
+    }
+    .product label {
+      margin-right: 8px;
+      font-size: 14px;
+    }
+    .product select {
+      padding: 3px;
+      font-size: 14px;
+    }
+    .product button {
+      float: right;
+      background: #004d40;
+      border: none;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.3s;
+      margin-top: -30px;
+    }
+    .product button:hover {
+      background: #00332f;
+    }
+    aside.cart {
+      position: fixed;
+      top: 90px;
+      right: 0;
+      width: 320px;
+      height: calc(100vh - 90px);
+      background: #fff;
+      border-left: 2px solid #00796b;
+      box-shadow: -3px 0 10px rgba(0,0,0,0.1);
+      padding: 15px;
+      overflow-y: auto;
+      transform: translateX(100%);
+      transition: transform 0.3s ease-in-out;
+      z-index: 999;
+    }
+    aside.cart.open {
+      transform: translateX(0);
+    }
+    aside.cart h2 {
+      margin-top: 0;
+      color: #00796b;
+      font-size: 20px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    aside.cart ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 15px 0;
+    }
+    aside.cart li {
+      padding: 8px 0;
+      border-bottom: 1px solid #ddd;
+      font-size: 14px;
+    }
+    aside.cart p strong {
+      font-size: 18px;
+      color: #00796b;
+    }
+    aside.cart button {
+      width: 100%;
+      margin-bottom: 10px;
+      background: #00796b;
+      border: none;
+      color: white;
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    aside.cart button:hover {
+      background: #004d40;
+    }
+    footer {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 13px;
+      color: #555;
+      padding: 15px 0;
+    }
+    footer a {
+      color: #00796b;
+      text-decoration: none;
+    }
+    footer a:hover {
+      text-decoration: underline;
+    }
+    @media(max-width: 900px) {
+      main {
+        flex-direction: column;
+      }
+      aside.cart {
+        position: fixed;
+        width: 100%;
+        height: 40vh;
+        bottom: 0;
+        top: auto;
+        border-left: none;
+        border-top: 2px solid #00796b;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="cart-bar" aria-label="Cart summary bar" tabindex="0" role="button" aria-pressed="false" onclick="toggleCart()">
+    <div class="cart-info" id="cart-summary">Cart: 0 items | Total: ₹0.00</div>
+    <button aria-label="Toggle cart details" onclick="event.stopPropagation(); toggleCart();">View Cart</button>
+  </header>
+
+  <div id="contact-info">
+    Please contact us on WhatsApp at 
+    <a href="https://wa.me/919410091694" target="_blank" rel="noopener noreferrer">9410091694</a> 
+    for more information, prices, and product details.
+  </div>
+
+  <main>
+    <section class="products-column" id="dals-section" tabindex="0" aria-label="Dals category products">
+      <h2>Dals</h2>
+    </section>
+    <section class="products-column" id="ayurvedic-section" tabindex="0" aria-label="Ayurvedic Medicines category products">
+      <h2>Ayurvedic Medicines</h2>
+    </section>
+    <section class="products-column" id="herbs-section" tabindex="0" aria-label="Medical Herbs category products">
+      <h2>Medical Herbs</h2>
+    </section>
+    <section class="products-column" id="dailyuse-section" tabindex="0" aria-label="Daily Use Items category products">
+      <h2>Daily Use Items</h2>
+    </section>
+    <section class="products-column" id="spices-section" tabindex="0" aria-label="Spices category products">
+      <h2>Spices</h2>
+    </section>
+    <section class="products-column" id="refinedghee-section" tabindex="0" aria-label="Refined Oils & Ghee category products">
+      <h2>Refined Oils & Ghee</h2>
+    </section>
+  </main>
+
+  <aside class="cart" role="region" aria-label="Shopping Cart" id="cart-sidebar">
+    <h2>Your Cart</h2>
+    <ul id="cart-items" aria-live="polite" aria-relevant="additions removals"></ul>
+    <p><strong>Total: ₹<span id="total">0.00</span></strong></p>
+    <button onclick="placeOrder()" aria-label="Place order and contact via WhatsApp">Place Order</button>
+    <button onclick="printInvoice()" aria-label="Print the invoice">Print Invoice</button>
+  </aside>
+
+  <footer>
+    <p>Address: Ghanta Ghar, Mirch Mandi, Etah, Pincode 207001 | Phone: <a href="tel:+919410091694">9410091694</a></p>
+    <p>&copy; 2025 Jagdish Pansari Etah - General Store</p>
+  </footer>
+
+  <script>
+    // Products Data
+    const products = [
+      // Dals
+      { id: 1, name: "Toor Dal", price: 120, category: "dals" },
+      { id: 2, name: "Moong Dal", price: 110, category: "dals" },
+      { id: 3, name: "Chana Dal", price: 100, category: "dals" },
+      { id: 4, name: "Masoor Dal", price: 115, category: "dals" },
+      { id: 5, name: "Urad Dal", price: 130, category: "dals" },
+      { id: 6, name: "Rajma", price: 140, category: "dals" },
+      { id: 7, name: "Chickpeas", price: 125, category: "dals" },
+
+      // Ayurvedic Medicines
+      { id: 8, name: "Ashwagandha", price: 250, category: "ayurvedic" },
+      { id: 9, name: "Giloy", price: 180, category: "ayurvedic" },
+      { id: 10, name: "Neem Capsules", price: 300, category: "ayurvedic" },
+      { id: 11, name: "Triphala", price: 220, category: "ayurvedic" },
+      { id: 12, name: "Tulsi Powder", price: 200, category: "ayurvedic" },
+
+      // Medical Herbs
+      { id: 13, name: "Tulsi Leaves", price: 60, category: "herbs" },
+      { id: 14, name: "Mint Leaves", price: 40, category: "herbs" },
+      { id: 15, name: "Amla", price: 90, category: "herbs" },
+      { id: 16, name: "Neem Leaves", price: 50, category: "herbs" },
+      { id: 17, name: "Fenugreek Seeds", price: 70, category: "herbs" },
+      { id: 18, name: "Coriander Seeds", price: 65, category: "herbs" },
+      { id: 19, name: "Cumin Seeds", price: 80, category: "herbs" },
+
+      // Daily Use Items
+      { id: 20, name: "Toothpaste", price: 60, category: "dailyuse" },
+      { id: 21, name: "Soap", price: 45, category: "dailyuse" },
+      { id: 22, name: "Shampoo", price: 120, category: "dailyuse" },
+      { id: 23, name: "Detergent Powder", price: 90, category: "dailyuse" },
+      { id: 24, name: "Bath Oil", price: 150, category: "dailyuse" },
+
+      // Spices
+      { id: 25, name: "Turmeric Powder", price: 90, category: "spices" },
+      { id: 26, name: "Red Chili Powder", price: 100, category: "spices" },
+      { id: 27, name: "Garam Masala", price: 110, category: "spices" },
+      { id: 28, name: "Cinnamon", price: 130, category: "spices" },
+      { id: 29, name: "Cloves", price: 150, category: "spices" },
+      { id: 30, name: "Cardamom", price: 180, category: "spices" },
+
+      // Refined Oils & Ghee
+      { id: 31, name: "Mustard Oil", price: 140, category: "refinedghee" },
+      { id: 32, name: "Sunflower Oil", price: 130, category: "refinedghee" },
+      { id: 33, name: "Groundnut Oil", price: 150, category: "refinedghee" },
+      { id: 34, name: "Pure Ghee", price: 450, category: "refinedghee" }
+    ];
+
+    let cart = [];
+
+    function renderProducts() {
+      const categories = {
+        dals: document.getElementById("dals-section"),
+        ayurvedic: document.getElementById("ayurvedic-section"),
+        herbs: document.getElementById("herbs-section"),
+        dailyuse: document.getElementById("dailyuse-section"),
+        spices: document.getElementById("spices-section"),
+        refinedghee: document.getElementById("refinedghee-section"),
+      };
+
+      for (const category in categories) {
+        categories[category].innerHTML = `<h2>${categories[category].querySelector("h2").textContent}</h2>`;
+      }
+
+      products.forEach(({ id, name, price, category }) => {
+        const container = categories[category];
+        const productDiv = document.createElement("div");
+        productDiv.className = "product";
+        productDiv.setAttribute("tabindex", "0");
+        productDiv.innerHTML = `
+          <h3>${name}</h3>
+          <p>Price: ₹${price.toFixed(2)}</p>
+          <label for="qty-${id}">Qty:</label>
+          <select id="qty-${id}" aria-label="Quantity selector for ${name}">
+            ${[...Array(10).keys()].map(i => `<option value="${i+1}">${i+1}</option>`).join("")}
+          </select>
+          <button aria-label="Add ${name} to cart" onclick="addToCart(${id})">Add to Cart</button>
+        `;
+        container.appendChild(productDiv);
+      });
+    }
+
+    function addToCart(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+      const qtySelect = document.getElementById(`qty-${id}`);
+      const quantity = parseInt(qtySelect.value, 10);
+      if (quantity <= 0) return;
+
+      const existingItem = cart.find(item => item.id === id);
+      if (existingItem) {
+        existingItem.quantity += quantity;
+      } else {
+        cart.push({ ...product, quantity });
+      }
+      updateCart();
+      alert(`${quantity} x ${product.name} added to cart.`);
+    }
+
+    function updateCart() {
+      const cartItemsContainer = document.getElementById("cart-items");
+      cartItemsContainer.innerHTML = "";
+
+      let total = 0;
+      let totalItems = 0;
+
+      cart.forEach(({ id, name, price, quantity }) => {
+        total += price * quantity;
+        totalItems += quantity;
+        const li = document.createElement("li");
+        li.textContent = `${name} - Qty: ${quantity} - ₹${(price * quantity).toFixed(2)}`;
+        cartItemsContainer.appendChild(li);
+      });
+
+      document.getElementById("total").textContent = total.toFixed(2);
+      document.getElementById("cart-summary").textContent = `Cart: ${totalItems} item${totalItems !== 1 ? 's' : ''} | Total: ₹${total.toFixed(2)}`;
+    }
+
+    function placeOrder() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+      let orderDetails = "Order from Jagdish Pansari Etah - General Store:\n";
+      cart.forEach(item => {
+        orderDetails += `${item.name} - Qty: ${item.quantity}\n`;
+      });
+      const total = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+      orderDetails += `Total: ₹${total.toFixed(2)}\n\nPlease contact me for more details.`;
+      const whatsappNumber = "919410091694";
+      const whatsappURL = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(orderDetails)}`;
+      window.open(whatsappURL, "_blank");
+      cart = [];
+      updateCart();
+      closeCartSidebar();
+    }
+
+    function printInvoice() {
+      if (cart.length === 0) {
+        alert("Your cart is empty!");
+        return;
+      }
+      let invoiceWindow = window.open("", "Print Invoice", "width=600,height=600");
+      let invoiceHTML = `
+        <html>
+          <head>
+            <title>Invoice - Jagdish Pansari Etah</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; }
+              h1 { color: #00796b; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+              th { background: #004d40; color: white; }
+              tfoot td { font-weight: bold; }
+            </style>
+          </head>
+          <body>
+            <h1>Invoice</h1>
+            <p>Jagdish Pansari Etah - General Store</p>
+            <p>Address: Ghanta Ghar, Mirch Mandi, Etah, Pincode 207001</p>
+            <p>Phone: 9410091694</p>
+            <table>
+              <thead>
+                <tr><th>Product</th><th>Quantity</th><th>Price (₹)</th><th>Total (₹)</th></tr>
+              </thead>
+              <tbody>
+                ${cart.map(item => `
+                  <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity}</td>
+                    <td>${item.price.toFixed(2)}</td>
+                    <td>${(item.price * item.quantity).toFixed(2)}</td>
+                  </tr>`).join("")}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colspan="3">Total</td>
+                  <td>₹${cart.reduce((acc, i) => acc + i.price * i.quantity, 0).toFixed(2)}</td>
+                </tr>
+              </tfoot>
+            </table>
+          </body>
+        </html>
+      `;
+      invoiceWindow.document.write(invoiceHTML);
+      invoiceWindow.document.close();
+      invoiceWindow.focus();
+      invoiceWindow.print();
+      invoiceWindow.close();
+    }
+
+    function toggleCart() {
+      const cartSidebar = document.getElementById("cart-sidebar");
+      const cartBar = document.querySelector("header.cart-bar");
+      const expanded = cartSidebar.classList.toggle("open");
+      cartBar.setAttribute("aria-pressed", expanded);
+    }
+    function closeCartSidebar() {
+      const cartSidebar = document.getElementById("cart-sidebar");
+      const cartBar = document.querySelector("header.cart-bar");
+      cartSidebar.classList.remove("open");
+      cartBar.setAttribute("aria-pressed", false);
+    }
+
+    window.onload = () => {
+      renderProducts();
+      updateCart();
+    };
+  </script>
+</body>
+</html>
